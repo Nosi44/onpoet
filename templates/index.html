@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Nonsense Poetry Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: white;
+    margin: 15px;
+}
+
+button, select {
+    padding: 8px;
+    margin: 5px 0;
+}
+
+#poems {
+    margin-top: 20px;
+}
+
+.poem {
+    background: #222;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    white-space: pre-line;
+}
+</style>
+</head>
+<body>
+
+<h2 onclick="generatePoem()">🧨 Nonsense Poetry Engine</h2>
+
+<select id="mode">
+    <option value="ai">AI Mode</option>
+    <option value="local">Local Mode</option>
+    <option value="ultra">Ultra Violence</option>
+</select>
+
+<button onclick="generatePoem()">Сгенерировать</button>
+
+<div id="poems"></div>
+
+<script>
+
+let ultraModeActive = false;
+
+async function generatePoem(){
+
+    const mode = document.getElementById("mode").value;
+
+    if(mode === "ultra"){
+        ultraModeActive = true;
+        generateLocalPoem();
+        return;
+    }
+
+    ultraModeActive = false;
+
+    if(mode === "local"){
+        generateLocalPoem();
+        return;
+    }
+
+    // AI Mode
+    const response = await fetch("/api/poem", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({mode: "ai"})
+    });
+
+    const data = await response.json();
+    addPoem(data.poem);
+}
+
+function generateLocalPoem(){
+
+    const words = ["космос", "чайник", "гравитация", "мандарин",
+                   "параллель", "нейрон", "пылесос", "абсурд",
+                   "карандаш", "вселенная", "шёпот", "портал"];
+
+    function randomWord(){
+        return words[Math.floor(Math.random() * words.length)];
+    }
+
+    const poem =
+        randomWord() + " " + randomWord() + " " + randomWord() + "\n" +
+        randomWord() + " " + randomWord() + " " + randomWord() + "\n" +
+        randomWord() + " " + randomWord() + " " + randomWord() + "\n" +
+        randomWord() + " " + randomWord() + " " + randomWord();
+
+    addPoem(poem);
+}
+
+function addPoem(text){
+    const container = document.getElementById("poems");
+
+    const div = document.createElement("div");
+    div.className = "poem";
+    div.innerText = text;
+
+    container.prepend(div);
+}
+
+// Ultra mode infinite scroll
+window.addEventListener("scroll", function(){
+    if(ultraModeActive){
+        if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 50){
+            generateLocalPoem();
+        }
+    }
+});
+</script>
+
+</body>
+</html>
